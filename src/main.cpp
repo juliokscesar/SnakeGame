@@ -225,9 +225,19 @@ int main()
         if (selectedEntity)
         {
             ImGui::Text("Position");
-            ImGui::InputFloat("X", &selectedEntity->Transform.Position.x, -10.0f, 10.0f);
-            ImGui::InputFloat("Y", &selectedEntity->Transform.Position.y, -10.0f, 10.0f);
-            ImGui::InputFloat("Z", &selectedEntity->Transform.Position.z, -10.0f, 10.0f);
+            ImGui::SliderFloat("X##pos", &selectedEntity->Transform.Position.x, -10.0f, 10.0f);
+            ImGui::SliderFloat("Y##pos", &selectedEntity->Transform.Position.y, -10.0f, 10.0f);
+            ImGui::SliderFloat("Z##pos", &selectedEntity->Transform.Position.z, -10.0f, 10.0f);
+
+            ImGui::Text("Rotation");
+            ImGui::SliderFloat("X##rot", &selectedEntity->Transform.Rotation.x, -180.0f, 180.0f);
+            ImGui::SliderFloat("Y##rot", &selectedEntity->Transform.Rotation.y, -180.0f, 180.0f);
+            ImGui::SliderFloat("Z##rot", &selectedEntity->Transform.Rotation.z, -180.0f, 180.0f);
+
+            ImGui::Text("Scale");
+            ImGui::SliderFloat("X##scale", &selectedEntity->Transform.Scale.x, 0.1f, 100.0f);
+            ImGui::SliderFloat("Y##scale", &selectedEntity->Transform.Scale.y, 0.1f, 100.0f);
+            ImGui::SliderFloat("Z##scale", &selectedEntity->Transform.Scale.z, 0.1f, 100.0f);
         }
 
         ImGui::End();
