@@ -11,7 +11,7 @@ std::string readFromFile(const std::string& path)
     std::ifstream file(path);
     if (!file.is_open())
     {
-        std::cerr << "ERROR::IO::FILE_NOT_FOUND\n\"" << path << "\"\n";
+        std::cerr << "ERROR::IO::FILE_NOT_FOUND \"" << path << "\"\n";
         return "";
     }
 

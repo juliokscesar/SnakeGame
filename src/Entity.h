@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 
 #include <string>
+#include <chrono>
 
 #include "StaticMesh.h"
 #include "TransformComponent.h"
@@ -14,7 +15,7 @@ public:
     Entity(const std::string& name, const StaticMesh& staticMesh)
         : Name(name), Mesh(staticMesh), Transform(), ModelMatrix(1.0f) {}
 
-    virtual void Update();
+    virtual void Update(float deltaTime);
 
     std::string Name;
     StaticMesh Mesh;

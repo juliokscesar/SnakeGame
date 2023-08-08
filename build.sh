@@ -3,6 +3,7 @@ g++ -o build/app \
     src/Shader.cpp \
     src/StaticMesh.cpp \
     src/Entity.cpp \
+    src/UIEntityManager.cpp \
     ext/glad/src/glad.c \
     ext/imgui/imgui.cpp \
     ext/imgui/imgui_draw.cpp \

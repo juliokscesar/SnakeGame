@@ -1,25 +1,28 @@
+#include <iostream>
+#include <vector>
+#include <chrono>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <iostream>
-#include <vector>
-
 #include <imgui/imgui.h>
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
 
+#include "Input.h"
 #include "Shader.h"
 #include "StaticMesh.h"
 #include "Entity.h"
+#include "UIEntityManager.h"
+#include "Snake.h"
 
 uint32_t screenWidth = 800, screenHeight = 600;
 
 void framebufferResizeCallback(GLFWwindow* window, GLint width, GLint height);
-void processKeyboardInput(GLFWwindow* window);
-void updateAndDrawEntities(const std::vector<Entity*>& entityDB, const Shader& shader);
+void updateAndDrawEntities(const std::vector<Entity*>& entityDB, const Shader& shader, float deltaTime);
 
 int main()
 {
@@ -40,6 +43,8 @@ int main()
     }
     // Set our current context to the window's context
     glfwMakeContextCurrent(window);
+
+    Input::SetCtxWindow(window);
 
     // Initialize GLAD
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -172,26 +177,38 @@ int main()
     cubeMesh.SetVertexAttribute(0, 3, GL_FLOAT, 6 * sizeof(float), (void*)0);
     cubeMesh.SetVertexAttribute(1, 3, GL_FLOAT, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 
-    Entity cube("Cube", cubeMesh);
-    cube.Transform.Position = glm::vec3(0.0f, 0.0f, 0.5f);
-    cube.Transform.Rotation = glm::vec3(-55.0f, 0.0f, 0.0f);
-    cube.Transform.Scale = glm::vec3(0.25f);
+    Snake snake("Snake", cubeMesh);
+    snake.Transform.Position.z = 0.6f;
+    snake.Transform.Rotation.x = -55.0f;
+    snake.Transform.Scale = glm::vec3(0.15f);
 
     std::vector<Entity*> entityDB;
     entityDB.push_back(&plane);
-    entityDB.push_back(&cube);
+    entityDB.push_back(&snake);
 
-    Entity* selectedEntity = nullptr;
+    UIEntityManager entityManager(entityDB);
+
+
+    // Time stuff for deltaTime
+    std::chrono::time_point<std::chrono::high_resolution_clock> lastFrame, currentFrame;
+    lastFrame = std::chrono::high_resolution_clock::now();
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
+
+        if (Input::GetKey(GLFW_KEY_ESCAPE) == KeyEvent::PRESS)
+            glfwSetWindowShouldClose(window, true);
+
+        currentFrame = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<float> deltaTimeDur = currentFrame - lastFrame;
+        lastFrame = std::chrono::high_resolution_clock::now();
+        float deltaTime = deltaTimeDur.count();
 
         // Start new ImGui Frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-
-        processKeyboardInput(window);
 
         glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -211,40 +228,14 @@ int main()
         mainShader.SetUniformMat4("view", view);
         mainShader.SetUniformMat4("projection", projection);
 
-        updateAndDrawEntities(entityDB, mainShader);
-
-
-        ImGui::Begin("Entity Manager");
-
-        for (Entity* entity : entityDB)
-        {
-            if (ImGui::Button(entity->Name.c_str()))
-                selectedEntity = entity;
-        }
-
-        if (selectedEntity)
-        {
-            ImGui::Text("Position");
-            ImGui::SliderFloat("X##pos", &selectedEntity->Transform.Position.x, -10.0f, 10.0f);
-            ImGui::SliderFloat("Y##pos", &selectedEntity->Transform.Position.y, -10.0f, 10.0f);
-            ImGui::SliderFloat("Z##pos", &selectedEntity->Transform.Position.z, -10.0f, 10.0f);
-
-            ImGui::Text("Rotation");
-            ImGui::SliderFloat("X##rot", &selectedEntity->Transform.Rotation.x, -180.0f, 180.0f);
-            ImGui::SliderFloat("Y##rot", &selectedEntity->Transform.Rotation.y, -180.0f, 180.0f);
-            ImGui::SliderFloat("Z##rot", &selectedEntity->Transform.Rotation.z, -180.0f, 180.0f);
-
-            ImGui::Text("Scale");
-            ImGui::SliderFloat("X##scale", &selectedEntity->Transform.Scale.x, 0.1f, 100.0f);
-            ImGui::SliderFloat("Y##scale", &selectedEntity->Transform.Scale.y, 0.1f, 100.0f);
-            ImGui::SliderFloat("Z##scale", &selectedEntity->Transform.Scale.z, 0.1f, 100.0f);
-        }
-
-        ImGui::End();
+        updateAndDrawEntities(entityDB, mainShader, deltaTime);
+        entityManager.Draw(deltaTime);
 
         // ImGui Rendering
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        
 
         glfwSwapBuffers(window);
     }
@@ -267,18 +258,12 @@ void framebufferResizeCallback(GLFWwindow* window, GLint width, GLint height)
     screenHeight = height;
 }
 
-void processKeyboardInput(GLFWwindow* window)
-{
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-}
-
-void updateAndDrawEntities(const std::vector<Entity*>& entityDB, const Shader& shader)
+void updateAndDrawEntities(const std::vector<Entity*>& entityDB, const Shader& shader, float deltaTime)
 {
     shader.Use();
     for (Entity* entity : entityDB)
     {
-        entity->Update();
+        entity->Update(deltaTime);
         shader.SetUniformMat4("model", entity->ModelMatrix);
         entity->Mesh.Draw();
     }

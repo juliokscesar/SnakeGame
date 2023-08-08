@@ -2,7 +2,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-void Entity::Update()
+void Entity::Update(float deltaTime)
 {
     ModelMatrix = glm::mat4(1.0f);
 
