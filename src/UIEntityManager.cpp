@@ -14,6 +14,7 @@ void UIEntityManager::Draw(float deltaTime)
             m_selectedEntity = entity;
     }
 
+
     if (m_selectedEntity)
     {
         ImGui::Text("Position");

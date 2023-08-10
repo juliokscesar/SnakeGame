@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <chrono>
+#include <cstdio>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -177,14 +178,16 @@ int main()
     cubeMesh.SetVertexAttribute(0, 3, GL_FLOAT, 6 * sizeof(float), (void*)0);
     cubeMesh.SetVertexAttribute(1, 3, GL_FLOAT, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 
-    Snake snake("Snake", cubeMesh);
-    snake.Transform.Position.z = 0.6f;
-    snake.Transform.Rotation.x = -55.0f;
-    snake.Transform.Scale = glm::vec3(0.15f);
+    Snake head("Snake", cubeMesh);
+    head.Transform.Position.z = 0.6f;
+    head.Transform.Rotation.x = -55.0f;
+    head.Transform.Scale = glm::vec3(0.1f);
+
+    std::vector<Snake*> snakeBody;
 
     std::vector<Entity*> entityDB;
     entityDB.push_back(&plane);
-    entityDB.push_back(&snake);
+    entityDB.push_back(&head);
 
     UIEntityManager entityManager(entityDB);
 
@@ -199,6 +202,21 @@ int main()
 
         if (Input::GetKey(GLFW_KEY_ESCAPE) == KeyEvent::PRESS)
             glfwSetWindowShouldClose(window, true);
+
+        if (Input::GetKey(GLFW_KEY_B) == KeyEvent::PRESS)
+        {
+            std::cout << "B PRESS\n";
+            head.BodySize++;
+            char* bodyPartName = new char[7];
+            sprintf(bodyPartName, "snake%n", head.BodySize);
+            
+            glm::vec3 newPos = head.Transform.Position + glm::vec3(0.0f, 4.0f, 0.0f);
+            Snake* newPart = new Snake(std::string(bodyPartName), cubeMesh, newPos, head.Transform.Rotation, head.Transform.Scale);
+            snakeBody.push_back(newPart);
+            entityDB.push_back(newPart);
+
+            delete[] bodyPartName;
+        }
 
         currentFrame = std::chrono::high_resolution_clock::now();
         std::chrono::duration<float> deltaTimeDur = currentFrame - lastFrame;
@@ -236,9 +254,12 @@ int main()
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         
-
         glfwSwapBuffers(window);
     }
+
+    for (Snake* part : snakeBody)
+            delete part;
+
 
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();

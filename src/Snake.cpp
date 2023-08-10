@@ -6,6 +6,9 @@
 
 #include "Input.h"
 
+#define MIN_X -2.8
+#define MIN_Y -2.9
+
 void Snake::Update(float deltaTime)
 {
     Entity::Update(deltaTime);
@@ -47,5 +50,8 @@ void Snake::Update(float deltaTime)
         return;
     }
 
-    std::cout << (int)direction << "\n";
+    if (Transform.Position.x < -4.44f || Transform.Position.x > 4.44f)
+        Transform.Position.x *= -1;
+    if (Transform.Position.y < -4.58f || Transform.Position.y > 4.58f)
+        Transform.Position.y *= -1;
 }
