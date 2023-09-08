@@ -3,3 +3,5 @@ build/
 ext/glfw-win32/
 
 imgui.ini
+
+*~

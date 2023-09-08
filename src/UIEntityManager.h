@@ -6,13 +6,14 @@
 class UIEntityManager
 {
 public:
-    UIEntityManager(const std::vector<Entity*>& entityDB)
-        : m_entityDB(entityDB), m_selectedEntity(nullptr) {}
+    UIEntityManager(std::vector<Entity*>& entityDB)
+        : m_entityDB(entityDB), m_selectedEntity(nullptr), m_selectedEntityIndex(0) {}
 
     void Draw(float deltaTime);
 
 private:
-    const std::vector<Entity*>& m_entityDB;
+    std::vector<Entity*>& m_entityDB;
 
     Entity* m_selectedEntity;
+    size_t m_selectedEntityIndex;
 };

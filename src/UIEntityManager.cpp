@@ -8,12 +8,16 @@ void UIEntityManager::Draw(float deltaTime)
 
     ImGui::Text("FPS: %f", (1.0f / deltaTime));
 
-    for (Entity *entity : m_entityDB)
+    for (size_t i = 0, n = m_entityDB.size(); i < n; i++)
     {
-        if (ImGui::Button(entity->Name.c_str()))
-            m_selectedEntity = entity;
+        if (ImGui::Button(m_entityDB[i]->Name.c_str()))
+        {
+            m_selectedEntity = m_entityDB[i];
+            m_selectedEntityIndex = i;
+        }
+        ImGui::SameLine();
     }
-
+    ImGui::NewLine();
 
     if (m_selectedEntity)
     {
@@ -31,6 +35,14 @@ void UIEntityManager::Draw(float deltaTime)
         ImGui::InputFloat("X##scale", &m_selectedEntity->Transform.Scale.x, 0.1f, 100.0f);
         ImGui::InputFloat("Y##scale", &m_selectedEntity->Transform.Scale.y, 0.1f, 100.0f);
         ImGui::InputFloat("Z##scale", &m_selectedEntity->Transform.Scale.z, 0.1f, 100.0f);
+
+        ImGui::Checkbox("Is Visible", &(m_selectedEntity->IsVisible));
+
+        if (ImGui::Button("Delete"))
+        {
+            m_entityDB.erase(m_entityDB.begin() + m_selectedEntityIndex);
+            m_selectedEntity = nullptr;
+        }
     }
 
     ImGui::End();

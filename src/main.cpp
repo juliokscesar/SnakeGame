@@ -208,7 +208,7 @@ int main()
             std::cout << "B PRESS\n";
             head.BodySize++;
             char* bodyPartName = new char[7];
-            sprintf(bodyPartName, "snake%n", head.BodySize);
+            sprintf(bodyPartName, "snake%d", head.BodySize);
             
             glm::vec3 newPos = head.Transform.Position + glm::vec3(0.0f, 4.0f, 0.0f);
             Snake* newPart = new Snake(std::string(bodyPartName), cubeMesh, newPos, head.Transform.Rotation, head.Transform.Scale);
@@ -286,6 +286,7 @@ void updateAndDrawEntities(const std::vector<Entity*>& entityDB, const Shader& s
     {
         entity->Update(deltaTime);
         shader.SetUniformMat4("model", entity->ModelMatrix);
-        entity->Mesh.Draw();
+        if (entity->IsVisible)
+            entity->Mesh.Draw();
     }
 }
